@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stimuler · Reading-state outcomes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&family=Red+Hat+Display:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#ffda75; --goldword:#E9B94D; --peach:#EAC9B6;
+  --grn:#57C46C; --grnword:#6FD37F; --grnborder:#4E9E5C;
+  --amberborder:#C98F3F;
+  --soft:#C9A98C;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#1d1d1f;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;font-family:'Urbanist',sans-serif}
+
+.stage{position:relative;width:412px;height:917px;background:#0b0b0b;border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #0d0d0d,0 0 0 12px #2a2a2a,0 40px 90px -30px rgba(0,0,0,.6)}
+
+/* background */
+.bg{position:absolute;left:-235px;top:-112px;width:1016px;height:936px;pointer-events:none;z-index:0;transition:opacity .8s var(--ease)}
+.overlay{position:absolute;left:0;top:49px;width:412px;height:868px;background:rgba(40,40,40,.31);z-index:1;pointer-events:none}
+.greenwash{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .7s var(--ease);
+  background:radial-gradient(120% 75% at 50% 18%,rgba(48,112,60,.42),rgba(10,20,12,.12) 60%,transparent 82%)}
+.stage.th-green .greenwash{opacity:1}
+.stage.th-green .bg{opacity:.35}
+
+/* status bar */
+.status{position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;color:#fff;font-size:14px;font-weight:600;z-index:25}
+.status .r{display:flex;align-items:center;gap:7px;font-size:12px;opacity:.9}
+
+.screen{position:absolute;inset:0;display:none}
+.screen.on{display:block}
+
+/* ============ TOP ACKNOWLEDGEMENT CARD ============ */
+.notif{position:absolute;top:0;left:16px;right:16px;z-index:30;display:flex;align-items:center;gap:15px;
+  padding:17px 20px;border-radius:22px;pointer-events:none;
+  background:linear-gradient(150deg,rgba(31,48,33,.96),rgba(17,26,18,.96));
+  backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
+  border:1px solid rgba(87,196,108,.34);
+  box-shadow:0 22px 48px -16px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.06);
+  transform:translateY(-140px);opacity:0;
+  transition:transform .52s var(--ease),opacity .3s var(--ease)}
+.notif.show{transform:translateY(58px);opacity:1}
+.notif .ck{width:42px;height:42px;border-radius:50%;background:radial-gradient(75% 75% at 50% 30%,#5FBF74,#2E6B3B);
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 6px 16px -6px rgba(87,196,108,.7)}
+.notif .ck svg{width:18px;height:18px;color:#0f1c11}
+.notif .tx{display:flex;flex-direction:column;min-width:0}
+.notif .tx .t{display:block;font-weight:700;font-size:19px;color:#EAFBEC;letter-spacing:-.01em;line-height:1.15}
+.notif .tx .s{display:block;font-weight:500;font-size:13.5px;color:#8FBF98;margin-top:3px;line-height:1.3}
+
+/* ============ HEADER ============ */
+.lg{background:rgba(58,56,52,.42);backdrop-filter:blur(16px) saturate(115%);-webkit-backdrop-filter:blur(16px) saturate(115%);
+  border:1px solid rgba(255,255,255,.11);box-shadow:0 3px 12px -7px rgba(0,0,0,.45)}
+.back{position:absolute;left:14px;top:78px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:16;cursor:pointer}
+.back img{width:23px;height:23px}
+.flagbtn{position:absolute;right:14px;top:78px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:16;cursor:pointer}
+.flagbtn svg{width:21px;height:21px;color:#c9c6c1}
+.title{position:absolute;left:50%;top:100px;transform:translate(-50%,-50%);font-weight:600;font-size:18.5px;color:#eee7db;white-space:nowrap;z-index:15;
+  padding:9px 22px;border-radius:26px;transition:opacity .3s var(--ease)}
+.stage:not(.read) .title{transition:opacity .45s var(--ease) .5s}
+.stage.read .title{opacity:0;pointer-events:none}
+
+/* reading progress bar */
+.r-prog{position:absolute;left:72px;right:72px;top:94px;height:11px;border-radius:999px;z-index:15;
+  background:rgba(190,150,125,.34);box-shadow:inset 0 1px 2px rgba(0,0,0,.45);
+  opacity:0;transform:translateY(-6px);transition:opacity .28s var(--ease),transform .28s var(--ease)}
+.stage.read .r-prog{opacity:1;transform:translateY(0);transition:opacity .45s var(--ease) .15s,transform .45s var(--ease) .15s}
+.r-prog .fl{position:absolute;left:0;top:0;bottom:0;width:48%;border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 60%),#C9A38A;
+  transition:width .8s var(--ease),background-color .6s var(--ease)}
+.r-prog .kn{position:absolute;top:50%;left:48%;width:13px;height:13px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);
+  box-shadow:0 1px 5px rgba(0,0,0,.5);transition:left .8s var(--ease)}
+.stage.th-green .r-prog{background:rgba(84,150,96,.28)}
+.stage.th-green .r-prog .fl{background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 60%),var(--grn)}
+
+/* ============ AVATAR (morphs) ============ */
+.av{position:absolute;left:59px;top:206px;width:294px;height:294px;border-radius:50%;z-index:6;padding:7px;
+  border:2.5px solid #A9805A;box-shadow:0 0 26px -6px rgba(190,140,86,.35);
+  transition:left .65s var(--ease) .15s,top .65s var(--ease) .15s,width .65s var(--ease) .15s,height .65s var(--ease) .15s,border-color .6s var(--ease),box-shadow .6s var(--ease)}
+.stage.read .av{left:129px;top:150px;width:154px;height:154px;padding:5px;border-width:2px;transition:left .65s var(--ease),top .65s var(--ease),width .65s var(--ease),height .65s var(--ease),border-color .6s var(--ease),box-shadow .6s var(--ease)}
+.stage.th-green .av{border-color:var(--grn);box-shadow:0 0 26px -6px rgba(87,196,108,.4)}
+.av .clip{width:100%;height:100%;border-radius:50%;overflow:hidden;background:#000}
+.av video{width:100%;height:100%;object-fit:cover;object-position:50% 14%}
+
+/* ============ VIDEO CAPTIONS ============ */
+.caps{position:absolute;top:560px;left:50%;transform:translateX(-50%);width:380px;text-align:center;z-index:8;transition:opacity .28s var(--ease)}
+.stage:not(.read) .caps{transition:opacity .5s var(--ease) .62s}
+.stage.read .caps{opacity:0;pointer-events:none}
+.caps .big{font-weight:400;font-size:22px;line-height:1.5;color:#fff;letter-spacing:.005em}
+.caps .inter{margin-top:15px;font-weight:300;font-size:13.5px;line-height:2;color:#9c9c9c;letter-spacing:.015em}
+.caps .inter span{border-bottom:1px dotted rgba(170,170,170,.55);margin:0 3px;padding-bottom:2.5px;display:inline-block}
+
+/* ============ COACH CHIP (bubble under avatar) ============ */
+.coach{position:absolute;left:50%;top:326px;transform:translateX(-50%) translateY(8px);z-index:8;opacity:0;
+  transition:opacity .25s var(--ease),transform .25s var(--ease)}
+.stage.read .coach{opacity:1;transform:translateX(-50%) translateY(0);transition:opacity .4s var(--ease) .25s,transform .4s var(--ease) .25s}
+.coach .tri{position:absolute;left:50%;top:-9px;transform:translateX(-50%);width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:11px solid #262220}
+.coach .pill{background:#262220;border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:13px 24px;
+  font-weight:500;font-size:15px;color:#d9d4cd;letter-spacing:-.1px;white-space:nowrap;box-shadow:0 8px 22px -10px rgba(0,0,0,.6);
+  transition:color .4s var(--ease),border-color .4s var(--ease)}
+.coach.amber .pill{color:#F0C071;border-color:rgba(232,163,61,.3)}
+.coach.soft .pill{color:#E3C6A6;border-color:rgba(201,169,140,.3)}
+.coach.green .pill{color:#9ADFA6;border-color:rgba(87,196,108,.3)}
+
+/* ============ READ CARD ============ */
+.readcard{position:absolute;left:36px;top:434px;width:340px;height:232px;z-index:6;border-radius:22px;
+  border:1.5px solid #9D7C4F;background:linear-gradient(180deg,rgba(30,22,13,.5),rgba(15,11,7,.26));
+  opacity:0;transform:translateY(14px);
+  transition:opacity .28s var(--ease),transform .28s var(--ease),border-color .5s var(--ease)}
+.stage.read .readcard{opacity:1;transform:translateY(0);transition:opacity .45s var(--ease) .3s,transform .45s var(--ease) .3s,border-color .5s var(--ease)}
+.stage.th-green .readcard{border-color:var(--grnborder)}
+.stage.th-amber .readcard{border-color:var(--amberborder)}
+.stage.th-soft .readcard{border-color:var(--soft)}
+
+.rc-label{position:absolute;left:22px;top:-14px;display:flex;align-items:center;gap:7px;padding:3px 12px 3px 10px;border-radius:10px;
+  background:#15100a;border:1.5px solid #9D7C4F;transition:border-color .5s var(--ease)}
+.stage.th-green .rc-label{border-color:var(--grnborder)}
+.stage.th-amber .rc-label{border-color:var(--amberborder)}
+.stage.th-soft .rc-label{border-color:var(--soft)}
+.rc-label img{width:22px;height:22px}
+.rc-label span{font-weight:500;font-size:13.5px;color:#c79a5a;letter-spacing:.28px;white-space:nowrap;transition:color .5s}
+.stage.th-green .rc-label span{color:#7CC98B}
+
+.rc-btn{position:absolute;top:-17px;width:34px;height:34px;border-radius:50%;background:#644c1b;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .5s var(--ease)}
+.rc-btn.speaker{right:64px}
+.rc-btn.bookmark{right:22px}
+.rc-btn img{width:17px;height:17px}
+.rc-btn svg{width:15px;height:15px;color:#e8d9b8;transition:color .5s}
+.stage.th-green .rc-btn{background:#2E6B3B}
+.rc-btn.pulse{animation:spk 1.1s var(--ease) infinite}
+@keyframes spk{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(232,163,61,.4)}50%{transform:scale(1.12);box-shadow:0 0 0 9px rgba(232,163,61,0)}}
+.rc-btn.bookmark.saved{background:#7A5B22}
+.rc-btn.bookmark.saved svg{color:#ffda75}
+.rc-btn.bookmark::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--gold);opacity:0;pointer-events:none}
+.rc-btn.bookmark.pop{animation:bpop .9s var(--ease)}
+.rc-btn.bookmark.pop::after{animation:bring .9s var(--ease)}
+@keyframes bpop{0%{transform:scale(1)}30%{transform:scale(1.65)}55%{transform:scale(1.18)}75%{transform:scale(1.32)}100%{transform:scale(1)}}
+@keyframes bring{0%{opacity:.95;transform:scale(.85)}70%{opacity:0;transform:scale(2.4)}100%{opacity:0;transform:scale(2.4)}}
+
+.rc-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:26px 22px 20px}
+.rc-en{font-weight:400;font-size:27px;line-height:1.35;color:#fff;text-align:center}
+.rc-en .w{transition:color .3s var(--ease)}
+.rc-en .w.hit{color:var(--goldword)}
+.stage.th-green .rc-en .w,.stage.th-green .rc-en .w.hit{color:var(--grnword)}
+.rc-en .w.dim{color:#7d786f}
+.rc-en .w.kbase{color:#6f6a63}
+.rc-en .w.kbase.kread{color:#fff}
+.rc-tr{font-family:'Red Hat Display',sans-serif;font-weight:400;font-size:15.5px;line-height:1.4;color:#999;text-align:center}
+
+/* ============ MIC ZONE ============ */
+.miczone{position:absolute;left:0;right:0;bottom:36px;height:150px;z-index:8;opacity:0;transform:translateY(14px);
+  transition:opacity .28s var(--ease),transform .28s var(--ease)}
+.stage.read .miczone{opacity:1;transform:translateY(0);transition:opacity .45s var(--ease) .38s,transform .45s var(--ease) .38s}
+.tap-tip{position:absolute;left:50%;bottom:112px;transform:translateX(-50%);background:#262220;border:1px solid rgba(255,255,255,.09);
+  border-radius:10px;padding:7px 14px;font-weight:500;font-size:13px;color:#d9d4cd;white-space:nowrap;transition:opacity .3s var(--ease)}
+.tap-tip::after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;
+  border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #262220}
+.mic{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:84px;height:84px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(72% 72% at 50% 34%,#caa04a,#8a6a2a);
+  box-shadow:0 0 0 8px rgba(227,178,74,.07),0 16px 32px -10px rgba(0,0,0,.6);transition:transform .18s var(--ease)}
+.mic:active{transform:translateX(-50%) scale(.94)}
+.mic .micico{width:27px;height:38px;transition:opacity .2s}
+.mic::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(227,178,74,.28);opacity:0;animation:micwave 2.4s var(--ease) infinite}
+@keyframes micwave{0%{transform:scale(1);opacity:.55}80%{opacity:0}100%{transform:scale(1.28);opacity:0}}
+
+/* recording */
+.wave{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:5px;opacity:0;transition:opacity .2s}
+.wave i{width:6px;border-radius:4px;background:#fff;height:12px}
+.miczone.rec .mic .micico{opacity:0}
+.miczone.rec .mic .wave{opacity:1}
+.miczone.rec .mic::after{animation-duration:1.4s}
+.miczone.rec .wave i{animation:wv .8s ease-in-out infinite}
+.miczone.rec .wave i:nth-child(1){animation-delay:0s}
+.miczone.rec .wave i:nth-child(2){animation-delay:.15s}
+.miczone.rec .wave i:nth-child(3){animation-delay:.3s}
+.miczone.rec .wave i:nth-child(4){animation-delay:.45s}
+@keyframes wv{0%,100%{height:10px}50%{height:30px}}
+.miczone.rec.quiet .wave i{animation-duration:1.6s;animation-name:wvq}
+@keyframes wvq{0%,100%{height:8px}50%{height:13px}}
+.miczone.rec .tap-tip{opacity:0}
+.side{position:absolute;bottom:34px;width:48px;height:48px;border-radius:50%;background:rgba(56,52,46,.7);border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transform:scale(.7);transition:.3s var(--ease);pointer-events:none}
+.miczone.rec .side{opacity:1;transform:scale(1);pointer-events:auto}
+.side.x{left:88px}
+.side.pause{right:88px}
+.side svg{width:18px;height:18px;color:#e5ddd0}
+
+/* ============ CHIPS HARNESS ============ */
+.chips{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:8px}
+.chips .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#b3b3b3;font-weight:700;margin:0 2px 3px}
+.chips button{display:flex;align-items:center;gap:9px;background:#141414;color:#c4c4c4;border:1px solid #2a2a2a;border-radius:30px;
+  padding:10px 16px 10px 13px;font-family:'Urbanist';font-weight:600;font-size:12.5px;cursor:pointer;transition:.2s var(--ease);white-space:nowrap}
+.chips button .d{width:7px;height:7px;border-radius:50%;background:#4a4a4a;transition:.2s}
+.chips button:hover{background:#1d1d1d;color:#efefef}
+.chips button.active{background:var(--gold);color:#1a1206;border-color:var(--gold)}
+.chips button.active .d{background:#1a1206}
+</style>
+<script>if(location.protocol.indexOf('http')===0)document.documentElement.style.zoom='0.85';</script>
+</head>
+<body>
+
+<div class="chips" id="chips">
+  <div class="lbl">Reading states</div>
+  <button data-flow="ideal" class="active"><span class="d"></span>Ideal · full read</button>
+  <button data-flow="retry"><span class="d"></span>Retry · partial</button>
+  <button data-flow="deferred"><span class="d"></span>Deferred · 2 tries</button>
+</div>
+
+<div class="stage" id="stage">
+  <div class="status"><span>3:34</span><span class="r">🔔 9.10 &nbsp; 📶 &nbsp; 42% 🔋</span></div>
+
+  <div class="notif" id="notif">
+    <span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+    <span class="tx"><span class="t" id="notifTxt">Perfect</span><span class="s" id="notifSub">Every word, first try</span></span>
+  </div>
+
+  <!-- ============ LESSON (video ⇄ reading morph) ============ -->
+  <div class="screen on" id="lesson">
+    <img class="bg" src="assets/bg-blobs.svg" alt="">
+    <div class="overlay"></div>
+    <div class="greenwash"></div>
+
+    <div class="back lg"><img src="assets/ic-back.svg" alt=""></div>
+    <div class="title lg" id="title">Introduction lesson</div>
+    <div class="flagbtn lg"><svg viewBox="0 0 256 256" fill="none"><line x1="48" y1="222" x2="48" y2="58" stroke="currentColor" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M48,176c64-55.43,112,55.43,176,0V56C160,111.43,112,.57,48,56" stroke="currentColor" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="r-prog"><div class="fl" id="progFl"></div><div class="kn" id="progKn"></div></div>
+
+    <div class="av" id="av"><div class="clip"><video src="assets/sarah-video.mp4" poster="assets/sarah-thumb.png" autoplay muted loop playsinline></video></div></div>
+
+    <div class="caps" id="caps">
+      <div class="big" id="capMain">¿Ves? Tienes todo un equipo aquí que cree en ti.</div>
+      <div class="inter" id="capInter"></div>
+    </div>
+
+    <div class="coach" id="coach"><div class="tri"></div><div class="pill" id="coachTxt">repeat after me</div></div>
+
+    <div class="readcard" id="card">
+      <div class="rc-label"><img src="assets/ic-read.svg" alt=""><span>Tap on Mic and Read</span></div>
+      <div class="rc-btn speaker" id="btnSpk"><img src="assets/speaker.svg" alt=""></div>
+      <div class="rc-btn bookmark" id="btnBmk"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.2L5 21V4a1 1 0 0 1 1-1z"/></svg></div>
+      <div class="rc-text">
+        <div class="rc-en" id="sentence"></div>
+        <div class="rc-tr" id="translation">Practicaré inglés todos los días</div>
+      </div>
+    </div>
+
+    <div class="miczone" id="miczone">
+      <div class="tap-tip" id="tapTip">Tap to speak</div>
+      <div class="side x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+      <div class="mic" id="mic">
+        <svg class="micico" viewBox="0 0 28 40" fill="none" stroke="#fff" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9.2" y="2.6" width="9.6" height="22.4" rx="4.8"/>
+          <path d="M3.6 17.4v2.1a10.4 10.4 0 0 0 20.8 0v-2.1"/>
+          <path d="M14 29.9v7.5"/>
+        </svg>
+        <div class="wave"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="side pause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M9 5v14M15 5v14"/></svg></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const stage=$('#stage'),mz=$('#miczone'),coach=$('#coach'),coachTxt=$('#coachTxt');
+const sentence=$('#sentence'),translation=$('#translation'),btnSpk=$('#btnSpk'),btnBmk=$('#btnBmk');
+const capMain=$('#capMain'),capInter=$('#capInter'),notif=$('#notif'),notifTxt=$('#notifTxt'),notifSub=$('#notifSub');
+
+/* ---------- phrase data ---------- */
+const PHRASE={en:'I will practice speaking English every day',tr:'Practicaré inglés todos los días'};
+let words=[];
+
+function setPhrase(p){
+  translation.textContent=p.tr;
+  sentence.innerHTML=p.en.split(' ').map((w,i)=>`<span class="w" data-i="${i}">${w}</span>`).join(' ');
+  words=[...sentence.querySelectorAll('.w')];
+}
+
+/* ---------- run-token cancellation ---------- */
+let runId=0;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function wait(ms,id){await sleep(ms);if(id!==runId)throw 'cancelled';}
+
+/* ---------- interlinear caption ---------- */
+function setInter(txt){capInter.innerHTML=txt.split(' ').map(w=>`<span>${w}</span>`).join('');}
+
+/* ---------- low-level UI ops ---------- */
+function clearThemes(){stage.classList.remove('th-green','th-amber','th-soft')}
+function resetWords(){words.forEach(w=>w.className='w')}
+function setRec(on,quiet=false){mz.classList.toggle('rec',on);mz.classList.toggle('quiet',on&&quiet)}
+function setCoach(txt,tone=''){coachTxt.textContent=txt;coach.className='coach'+(tone?' '+tone:'')}
+function setProgress(pct){$('#progFl').style.width=pct+'%';$('#progKn').style.left=pct+'%'}
+function speakerPulse(on){btnSpk.classList.toggle('pulse',on)}
+
+const NOTIF_SUB={'Perfect':'Every word, first try','Nice':'You got the whole phrase'};
+async function showNotif(txt,id){
+  notifTxt.textContent=txt;
+  notifSub.textContent=NOTIF_SUB[txt]||'';
+  notif.classList.add('show');
+  await wait(1900,id);
+  notif.classList.remove('show');
+}
+function hideNotif(){notif.classList.remove('show')}
+
+function resetLesson({toVideo=true}={}){
+  clearThemes();hideNotif();setRec(false);speakerPulse(false);
+  btnBmk.classList.remove('saved','pop');
+  setCoach('repeat after me');
+  setPhrase(PHRASE);resetWords();
+  setProgress(48);
+  stage.classList.toggle('read',!toVideo);
+  capMain.textContent='¿Ves? Tienes todo un equipo aquí que cree en ti.';
+  setInter('You see? You have a whole team here who believes in you.');
+}
+
+/* highlight words one by one; items: index or {i,delayBefore} */
+async function speakWords(items,id,pace=340){
+  for(const it of items){
+    const i=typeof it==='number'?it:it.i;
+    const pre=typeof it==='number'?0:(it.delayBefore||0);
+    if(pre)await wait(pre,id);
+    words[i].classList.add('hit');
+    await wait(pace+Math.random()*140,id);
+  }
+}
+
+/* speaker replay: all words drop to grey, each lights up white as it is read */
+async function karaoke(id,pace=380){
+  speakerPulse(true);
+  words.forEach(w=>w.className='w kbase');
+  await wait(450,id);
+  for(const w of words){
+    w.classList.add('kread');
+    await wait(pace+Math.random()*90,id);
+  }
+  await wait(350,id);
+  speakerPulse(false);
+}
+
+/* success resolve: green theme + top notification */
+async function resolveSuccess(id,label){
+  setRec(false);
+  await wait(350,id);
+  stage.classList.add('th-green');
+  words.forEach(w=>{w.className='w hit'});
+  setCoach('Read the phrase out loud','green');
+  setProgress(60);
+  await showNotif(label,id);
+}
+
+/* clean return to video: captions are set while hidden, reading layer
+   fades out fully, then the avatar scales up and captions fade in */
+async function advanceToVideo(id,cap,inter){
+  await wait(600,id);
+  capMain.textContent=cap;setInter(inter);
+  clearThemes();hideNotif();speakerPulse(false);setRec(false);
+  stage.classList.remove('read');
+  await wait(1000,id);
+}
+
+/* ================= FLOWS ================= */
+
+async function flowIdeal(id){
+  resetLesson({toVideo:true});
+  await wait(2600,id);
+  capMain.textContent='Ahora, repite después de mí.';
+  setInter('Now, repeat after me.');
+  await wait(2200,id);
+  stage.classList.add('read');
+  await wait(900,id);
+  setCoach('repeat after me');
+  await wait(1400,id);
+  setCoach('Read the phrase out loud');
+  setRec(true);
+  await wait(500,id);
+  await speakWords([0,1,2,3,4,5,6],id);
+  await resolveSuccess(id,'Perfect');
+  await advanceToVideo(id,'¡Muy bien! Sigamos.','Very good! Let’s continue.');
+}
+
+async function flowRetry(id){
+  resetLesson({toVideo:false});
+  await wait(1300,id);
+  setCoach('Read the phrase out loud');
+  setRec(true);
+  await wait(500,id);
+  /* says: "I will practice English", misses speaking / every / day */
+  await speakWords([0,1,2,{i:4,delayBefore:500}],id,380);
+  await wait(600,id);
+  /* attempt 1 resolve: matched stay gold, missed drop to grey */
+  setRec(false);
+  stage.classList.add('th-amber');
+  [3,5,6].forEach(i=>words[i].className='w dim');
+  setCoach('Close! Listen once more','amber');
+  await wait(1400,id);
+  /* speaker reads the whole phrase, karaoke white over grey */
+  await karaoke(id);
+  /* back to the learner */
+  resetWords();
+  stage.classList.remove('th-amber');
+  setCoach('Now read it out loud');
+  setRec(true);
+  await wait(700,id);
+  await speakWords([0,1,2,3,4,5,6],id);
+  await resolveSuccess(id,'Nice');
+  await advanceToVideo(id,'¡Eso es! Sigamos.','That’s it! Let’s continue.');
+}
+
+async function flowDeferred(id){
+  resetLesson({toVideo:false});
+  await wait(1300,id);
+  setCoach('Read the phrase out loud');
+  setRec(true);
+  await wait(500,id);
+  await speakWords([0,1,{i:4,delayBefore:700}],id,400);
+  await wait(600,id);
+  /* attempt 1 resolve */
+  setRec(false);
+  stage.classList.add('th-amber');
+  [2,3,5,6].forEach(i=>words[i].className='w dim');
+  setCoach('Close! Listen once more','amber');
+  await wait(1400,id);
+  await karaoke(id);
+  resetWords();
+  stage.classList.remove('th-amber');
+  setCoach('Now read it out loud');
+  setRec(true);
+  await wait(700,id);
+  /* attempt 2, still short */
+  await speakWords([0,1,2,{i:4,delayBefore:700}],id,400);
+  await wait(600,id);
+  /* deferred: acknowledge, save, move on */
+  setRec(false);
+  stage.classList.add('th-soft');
+  words.forEach(w=>{w.className='w dim'});
+  setCoach('Tricky one. Saved for later','soft');
+  await wait(350,id);
+  btnBmk.classList.add('saved','pop');
+  await wait(2300,id);
+  await advanceToVideo(id,'Sigamos con la lección.','Let’s continue with the lesson.');
+}
+
+/* ================= HARNESS ================= */
+const FLOWS={ideal:flowIdeal,retry:flowRetry,deferred:flowDeferred};
+function startFlow(name){
+  $$('.chips button').forEach(b=>b.classList.toggle('active',b.dataset.flow===name));
+  const id=++runId;
+  FLOWS[name](id).catch(()=>{});
+}
+$$('.chips button').forEach(b=>b.onclick=()=>startFlow(b.dataset.flow));
+
+/* manual mic tap replays the active flow */
+$('#mic').onclick=()=>{
+  const active=document.querySelector('.chips button.active');
+  if(active)startFlow(active.dataset.flow);
+};
+$('#btnSpk').onclick=e=>e.stopPropagation();
+
+const initial=location.hash.slice(1);
+startFlow(FLOWS[initial]?initial:'ideal');
+</script>
+</body>
+</html>
