@@ -2,7 +2,7 @@
 
 Prototype of the roadmap reading-state evaluation flows from `reading-state-spec.md`, built on the Figma "ideal" section (Stimuler v2 · node 32234-49720).
 
-Open `index.html`. Right-side chips switch between auto-scripted flows:
+Live at [stimuler-reading-states.vercel.app](https://stimuler-reading-states.vercel.app), or open `index.html` locally. Right-side chips switch between auto-scripted flows:
 
 - **Ideal · full read** — video lesson (dotted-underline interlinear subtitles) → scale-down into the reading state → live gold word highlights → green success, with **"Perfect" sliding in as a top notification** → clean scale-back into the video.
 - **Retry · partial** — attempt 1 lands 4 of 7 words: matched words stay gold, missed words drop to grey. The speaker then replays the whole phrase karaoke-style (grey base, each word lighting white as it is read), then the learner reads again and gets "Nice" as a top notification.
