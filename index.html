@@ -124,8 +124,8 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
 .stage.th-green .readcard{border-color:var(--grnborder)}
 .stage.th-amber .readcard{border-color:var(--amberborder)}
 .stage.th-soft .readcard{border-color:var(--soft)}
-.stage.th-retry .readcard{border-color:var(--retry)}
-.stage.th-retry.fillwarm .readcard{background:linear-gradient(180deg,rgba(78,52,20,.62),rgba(38,25,11,.34))}
+.stage.th-retry .readcard{border-color:var(--retry);background:linear-gradient(180deg,rgba(78,52,20,.62),rgba(38,25,11,.34))}
+.stage.th-retry.borderonly .readcard{background:linear-gradient(180deg,rgba(30,22,13,.5),rgba(15,11,7,.26))}
 
 .rc-label{position:absolute;left:22px;top:-14px;display:flex;align-items:center;gap:7px;padding:3px 12px 3px 10px;border-radius:10px;
   background:#15100a;border:1.5px solid #9D7C4F;transition:border-color .5s var(--ease)}
@@ -236,7 +236,7 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
   <button data-flow="ideal" class="active"><span class="d"></span>Ideal · full read</button>
   <button data-flow="retry"><span class="d"></span>Retry · partial</button>
   <button data-flow="deferred"><span class="d"></span>Deferred · 2 tries</button>
-  <label class="opt"><input type="checkbox" id="fillToggle"> Card fill warms too</label>
+  <label class="opt"><input type="checkbox" id="fillToggle"> Border only, no fill</label>
 </div>
 
 <div class="stage" id="stage">
@@ -514,7 +514,7 @@ function startFlow(name){
   FLOWS[name](id).catch(()=>{});
 }
 $$('.chips button').forEach(b=>b.onclick=()=>startFlow(b.dataset.flow));
-$('#fillToggle').onchange=e=>stage.classList.toggle('fillwarm',e.target.checked);
+$('#fillToggle').onchange=e=>stage.classList.toggle('borderonly',e.target.checked);
 
 /* manual mic tap replays the active flow */
 $('#mic').onclick=()=>{
