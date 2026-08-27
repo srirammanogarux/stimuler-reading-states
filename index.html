@@ -6,17 +6,17 @@
 <title>Stimuler · Reading-state outcomes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&family=Red+Hat+Display:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Geist:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --gold:#ffda75; --goldword:#E9B94D; --peach:#EAC9B6;
+  --gold:#8F825F; --goldword:#E9B94D; --peach:#EAC9B6;
   --grn:#57C46C; --grnword:#6FD37F; --grnborder:#4E9E5C;
   --amberborder:#C98F3F;
-  --soft:#C9A98C;
+  --soft:#C9A98C; --retry:#B47A33;
   --ease:cubic-bezier(.22,.61,.36,1);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;font-family:'Urbanist',sans-serif}
+body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;font-family:'Inter',sans-serif;font-optical-sizing:auto}
 
 .stage{position:relative;width:412px;height:917px;background:#0b0b0b;border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #0d0d0d,0 0 0 12px #2a2a2a,0 40px 90px -30px rgba(0,0,0,.6)}
 
@@ -41,7 +41,7 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
   background:linear-gradient(150deg,rgba(31,48,33,.96),rgba(17,26,18,.96));
   backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
   border:1px solid rgba(87,196,108,.34);
-  box-shadow:0 22px 48px -16px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.06);
+  box-shadow:0 10px 26px -12px rgba(0,0,0,.5);
   transform:translateY(-140px);opacity:0;
   transition:transform .52s var(--ease),opacity .3s var(--ease)}
 .notif.show{transform:translateY(58px);opacity:1}
@@ -50,7 +50,15 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
 .notif .ck svg{width:18px;height:18px;color:#0f1c11}
 .notif .tx{display:flex;flex-direction:column;min-width:0}
 .notif .tx .t{display:block;font-weight:700;font-size:19px;color:#EAFBEC;letter-spacing:-.01em;line-height:1.15}
-.notif .tx .s{display:block;font-weight:500;font-size:13.5px;color:#8FBF98;margin-top:3px;line-height:1.3}
+.notif .tx .s{display:block;font-weight:500;font-size:13.5px;color:#9BCCA4;margin-top:3px;line-height:1.3}
+.notif .ck .i-save{display:none}
+.notif.saved{background:linear-gradient(150deg,rgba(52,40,32,.96),rgba(28,21,17,.96));border-color:rgba(234,201,182,.34)}
+.notif.saved .ck{background:radial-gradient(75% 75% at 50% 30%,#C9A98C,#7A5A44);box-shadow:0 5px 14px -7px rgba(234,201,182,.5)}
+.notif.saved .ck .i-check{display:none}
+.notif.saved .ck .i-save{display:block}
+.notif.saved .ck svg{color:#241A14}
+.notif.saved .tx .t{color:#F7EAE1}
+.notif.saved .tx .s{color:#C9A98C}
 
 /* ============ HEADER ============ */
 .lg{background:rgba(58,56,52,.42);backdrop-filter:blur(16px) saturate(115%);-webkit-backdrop-filter:blur(16px) saturate(115%);
@@ -105,6 +113,7 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
 .coach.amber .pill{color:#F0C071;border-color:rgba(232,163,61,.3)}
 .coach.soft .pill{color:#E3C6A6;border-color:rgba(201,169,140,.3)}
 .coach.green .pill{color:#9ADFA6;border-color:rgba(87,196,108,.3)}
+.coach.hide{opacity:0 !important;transform:translateX(-50%) translateY(6px) !important}
 
 /* ============ READ CARD ============ */
 .readcard{position:absolute;left:36px;top:434px;width:340px;height:232px;z-index:6;border-radius:22px;
@@ -115,12 +124,16 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
 .stage.th-green .readcard{border-color:var(--grnborder)}
 .stage.th-amber .readcard{border-color:var(--amberborder)}
 .stage.th-soft .readcard{border-color:var(--soft)}
+.stage.th-retry .readcard{border-color:var(--retry)}
+.stage.th-retry.fillwarm .readcard{background:linear-gradient(180deg,rgba(78,52,20,.62),rgba(38,25,11,.34))}
 
 .rc-label{position:absolute;left:22px;top:-14px;display:flex;align-items:center;gap:7px;padding:3px 12px 3px 10px;border-radius:10px;
   background:#15100a;border:1.5px solid #9D7C4F;transition:border-color .5s var(--ease)}
 .stage.th-green .rc-label{border-color:var(--grnborder)}
 .stage.th-amber .rc-label{border-color:var(--amberborder)}
 .stage.th-soft .rc-label{border-color:var(--soft)}
+.stage.th-retry .rc-label{border-color:var(--retry)}
+.stage.th-retry .rc-label span{color:#D2A05C}
 .rc-label img{width:22px;height:22px}
 .rc-label span{font-weight:500;font-size:13.5px;color:#c79a5a;letter-spacing:.28px;white-space:nowrap;transition:color .5s}
 .stage.th-green .rc-label span{color:#7CC98B}
@@ -134,7 +147,7 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
 .rc-btn.pulse{animation:spk 1.1s var(--ease) infinite}
 @keyframes spk{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(232,163,61,.4)}50%{transform:scale(1.12);box-shadow:0 0 0 9px rgba(232,163,61,0)}}
 .rc-btn.bookmark.saved{background:#7A5B22}
-.rc-btn.bookmark.saved svg{color:#ffda75}
+.rc-btn.bookmark.saved svg{color:var(--gold)}
 .rc-btn.bookmark::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--gold);opacity:0;pointer-events:none}
 .rc-btn.bookmark.pop{animation:bpop .9s var(--ease)}
 .rc-btn.bookmark.pop::after{animation:bring .9s var(--ease)}
@@ -149,7 +162,7 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
 .rc-en .w.dim{color:#7d786f}
 .rc-en .w.kbase{color:#6f6a63}
 .rc-en .w.kbase.kread{color:#fff}
-.rc-tr{font-family:'Red Hat Display',sans-serif;font-weight:400;font-size:15.5px;line-height:1.4;color:#999;text-align:center}
+.rc-tr{font-family:'Geist',sans-serif;font-weight:400;font-size:15.5px;line-height:1.4;color:#999;text-align:center}
 
 /* ============ MIC ZONE ============ */
 .miczone{position:absolute;left:0;right:0;bottom:36px;height:150px;z-index:8;opacity:0;transform:translateY(14px);
@@ -158,12 +171,23 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
 .tap-tip{position:absolute;left:50%;bottom:112px;transform:translateX(-50%);background:#262220;border:1px solid rgba(255,255,255,.09);
   border-radius:10px;padding:7px 14px;font-weight:500;font-size:13px;color:#d9d4cd;white-space:nowrap;transition:opacity .3s var(--ease)}
 .tap-tip::after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);width:0;height:0;
-  border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #262220}
+  border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid currentColor;color:#262220}
+.tap-tip.off{opacity:0}
+.tap-tip.missed{background:#2E2314;border-color:rgba(180,122,51,.55);color:#EAC58A;font-weight:600}
+.tap-tip.missed::after{color:#2E2314}
+.tap-tip.turn{background:#3A2E18;border-color:rgba(232,178,74,.45);color:#F3D9A2;font-weight:600}
+.tap-tip.turn::after{color:#3A2E18}
 .mic{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:84px;height:84px;border-radius:50%;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   background:radial-gradient(72% 72% at 50% 34%,#caa04a,#8a6a2a);
   box-shadow:0 0 0 8px rgba(227,178,74,.07),0 16px 32px -10px rgba(0,0,0,.6);transition:transform .18s var(--ease)}
 .mic:active{transform:translateX(-50%) scale(.94)}
+.miczone.asleep .mic{opacity:.38;pointer-events:none}
+.miczone.asleep .mic::after{animation:none;opacity:0}
+.mic-ring{position:absolute;left:50%;bottom:2px;width:112px;height:112px;margin-left:-56px;border-radius:50%;
+  border:2px solid rgba(232,178,74,.42);opacity:0;pointer-events:none;transition:opacity .3s var(--ease)}
+.miczone.ready .mic-ring{opacity:1;animation:ringpulse 1.7s var(--ease) infinite}
+@keyframes ringpulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.06);opacity:.9}}
 .mic .micico{width:27px;height:38px;transition:opacity .2s}
 .mic::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(227,178,74,.28);opacity:0;animation:micwave 2.4s var(--ease) infinite}
 @keyframes micwave{0%{transform:scale(1);opacity:.55}80%{opacity:0}100%{transform:scale(1.28);opacity:0}}
@@ -194,11 +218,14 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
 .chips{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:8px}
 .chips .lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a;font-weight:700;margin:0 2px 3px}
 .chips button{display:flex;align-items:center;gap:9px;background:#141414;color:#c4c4c4;border:1px solid #2a2a2a;border-radius:30px;
-  padding:10px 16px 10px 13px;font-family:'Urbanist';font-weight:600;font-size:12.5px;cursor:pointer;transition:.2s var(--ease);white-space:nowrap}
+  padding:10px 16px 10px 13px;font-family:'Inter';font-weight:600;font-size:12.5px;cursor:pointer;transition:.2s var(--ease);white-space:nowrap}
 .chips button .d{width:7px;height:7px;border-radius:50%;background:#4a4a4a;transition:.2s}
 .chips button:hover{background:#1d1d1d;color:#efefef}
 .chips button.active{background:var(--gold);color:#1a1206;border-color:var(--gold)}
 .chips button.active .d{background:#1a1206}
+.chips .opt{display:flex;align-items:center;gap:8px;margin-top:6px;padding:0 4px;
+  font-family:'Inter';font-weight:500;font-size:11.5px;color:#8a8a8a;cursor:pointer;user-select:none}
+.chips .opt input{accent-color:#8F825F;cursor:pointer}
 </style>
 <script>if(location.protocol.indexOf('http')===0)document.documentElement.style.zoom='0.85';</script>
 </head>
@@ -209,13 +236,14 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
   <button data-flow="ideal" class="active"><span class="d"></span>Ideal · full read</button>
   <button data-flow="retry"><span class="d"></span>Retry · partial</button>
   <button data-flow="deferred"><span class="d"></span>Deferred · 2 tries</button>
+  <label class="opt"><input type="checkbox" id="fillToggle"> Card fill warms too</label>
 </div>
 
 <div class="stage" id="stage">
   <div class="status"><span>3:34</span><span class="r">🔔 9.10 &nbsp; 📶 &nbsp; 42% 🔋</span></div>
 
   <div class="notif" id="notif">
-    <span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+    <span class="ck"><svg class="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><svg class="i-save" viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.2L5 21V4a1 1 0 0 1 1-1z"/></svg></span>
     <span class="tx"><span class="t" id="notifTxt">Perfect</span><span class="s" id="notifSub">Every word, first try</span></span>
   </div>
 
@@ -253,6 +281,7 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
     <div class="miczone" id="miczone">
       <div class="tap-tip" id="tapTip">Tap to speak</div>
       <div class="side x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+      <div class="mic-ring"></div>
       <div class="mic" id="mic">
         <svg class="micico" viewBox="0 0 28 40" fill="none" stroke="#fff" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round">
           <rect x="9.2" y="2.6" width="9.6" height="22.4" rx="4.8"/>
@@ -270,7 +299,7 @@ body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-co
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
 const stage=$('#stage'),mz=$('#miczone'),coach=$('#coach'),coachTxt=$('#coachTxt');
 const sentence=$('#sentence'),translation=$('#translation'),btnSpk=$('#btnSpk'),btnBmk=$('#btnBmk');
-const capMain=$('#capMain'),capInter=$('#capInter'),notif=$('#notif'),notifTxt=$('#notifTxt'),notifSub=$('#notifSub');
+const capMain=$('#capMain'),capInter=$('#capInter'),notif=$('#notif'),notifTxt=$('#notifTxt'),notifSub=$('#notifSub'),tapTip=$('#tapTip');
 
 /* ---------- phrase data ---------- */
 const PHRASE={en:'I will practice speaking English every day',tr:'Practicaré inglés todos los días'};
@@ -291,25 +320,33 @@ async function wait(ms,id){await sleep(ms);if(id!==runId)throw 'cancelled';}
 function setInter(txt){capInter.innerHTML=txt.split(' ').map(w=>`<span>${w}</span>`).join('');}
 
 /* ---------- low-level UI ops ---------- */
-function clearThemes(){stage.classList.remove('th-green','th-amber','th-soft')}
+function clearThemes(){stage.classList.remove('th-green','th-amber','th-soft','th-retry')}
+function setMicAsleep(on){mz.classList.toggle('asleep',on)}
+function setMicReady(on){mz.classList.toggle('ready',on)}
+function setCoachHidden(on){coach.classList.toggle('hide',on)}
+function setTip(txt,tone){tapTip.textContent=txt;tapTip.className='tap-tip'+(tone?' '+tone:'')}
+function showTip(on){tapTip.classList.toggle('off',!on)}
 function resetWords(){words.forEach(w=>w.className='w')}
 function setRec(on,quiet=false){mz.classList.toggle('rec',on);mz.classList.toggle('quiet',on&&quiet)}
 function setCoach(txt,tone=''){coachTxt.textContent=txt;coach.className='coach'+(tone?' '+tone:'')}
 function setProgress(pct){$('#progFl').style.width=pct+'%';$('#progKn').style.left=pct+'%'}
 function speakerPulse(on){btnSpk.classList.toggle('pulse',on)}
 
-const NOTIF_SUB={'Perfect':'Every word, first try','Nice':'You got the whole phrase'};
-async function showNotif(txt,id){
+const NOTIF_SUB={'Perfect':'Every word, first try','Nice':'You got the whole phrase','Saved to your roadmap':"We'll bring this phrase back later"};
+async function showNotif(txt,id,variant){
+  notif.classList.toggle('saved',variant==='saved');
   notifTxt.textContent=txt;
   notifSub.textContent=NOTIF_SUB[txt]||'';
   notif.classList.add('show');
-  await wait(1900,id);
+  await wait(variant==='saved'?2500:1900,id);
   notif.classList.remove('show');
 }
 function hideNotif(){notif.classList.remove('show')}
 
 function resetLesson({toVideo=true}={}){
   clearThemes();hideNotif();setRec(false);speakerPulse(false);
+  setMicAsleep(false);setMicReady(false);setCoachHidden(false);
+  setTip('Tap to speak','');showTip(true);
   btnBmk.classList.remove('saved','pop');
   setCoach('repeat after me');
   setPhrase(PHRASE);resetWords();
@@ -345,7 +382,7 @@ async function karaoke(id,pace=380){
 
 /* success resolve: green theme + top notification */
 async function resolveSuccess(id,label){
-  setRec(false);
+  setRec(false);setMicAsleep(true);showTip(false);
   await wait(350,id);
   stage.classList.add('th-green');
   words.forEach(w=>{w.className='w hit'});
@@ -384,32 +421,60 @@ async function flowIdeal(id){
   await advanceToVideo(id,'¡Muy bien! Sigamos.','Very good! Let’s continue.');
 }
 
+/* ---- shared beats for a read that lands short ---- */
+
+/* BEAT 1: words that did not land go inactive, card warms, mic goes quiet
+   and says why. The coach bubble steps out so one channel talks at a time. */
+async function beatLandsShort(missed,id){
+  setRec(false);
+  stage.classList.add('th-retry');
+  missed.forEach(i=>words[i].className='w dim');
+  setCoachHidden(true);
+  setMicAsleep(true);
+  setTip('You missed a few words','missed');
+  showTip(true);
+  await wait(2200,id);
+}
+
+/* BEAT 2: the speaker takes over and reads the phrase back. Mic stays asleep. */
+async function beatSpeakerPlays(id){
+  showTip(false);
+  setCoachHidden(false);
+  setCoach('Listen once, then read it again','amber');
+  await wait(600,id);
+  await karaoke(id);
+}
+
+/* BEAT 3: card returns to default, phrase resets, mic wakes with Your turn. */
+async function beatYourTurn(id){
+  resetWords();
+  stage.classList.remove('th-retry');
+  setMicAsleep(false);
+  setMicReady(true);
+  setCoach('Read the whole phrase');
+  setTip('Your turn','turn');
+  showTip(true);
+  await wait(1200,id);
+  setMicReady(false);
+  setRec(true);
+  await wait(500,id);
+}
+
 async function flowRetry(id){
   resetLesson({toVideo:false});
   await wait(1300,id);
   setCoach('Read the phrase out loud');
   setRec(true);
   await wait(500,id);
-  /* says: "I will practice English", misses speaking / every / day */
+  /* says "I will practice English", misses speaking / every / day */
   await speakWords([0,1,2,{i:4,delayBefore:500}],id,380);
   await wait(600,id);
-  /* attempt 1 resolve: matched stay gold, missed drop to grey */
-  setRec(false);
-  stage.classList.add('th-amber');
-  [3,5,6].forEach(i=>words[i].className='w dim');
-  setCoach('Close! Listen once more','amber');
-  await wait(1400,id);
-  /* speaker reads the whole phrase, karaoke white over grey */
-  await karaoke(id);
-  /* back to the learner */
-  resetWords();
-  stage.classList.remove('th-amber');
-  setCoach('Now read it out loud');
-  setRec(true);
-  await wait(700,id);
+  await beatLandsShort([3,5,6],id);
+  await beatSpeakerPlays(id);
+  await beatYourTurn(id);
   await speakWords([0,1,2,3,4,5,6],id);
   await resolveSuccess(id,'Nice');
-  await advanceToVideo(id,'¡Eso es! Sigamos.','That’s it! Let’s continue.');
+  await advanceToVideo(id,'\u00a1Eso es! Sigamos.','That\u2019s it! Let\u2019s continue.');
 }
 
 async function flowDeferred(id){
@@ -420,30 +485,25 @@ async function flowDeferred(id){
   await wait(500,id);
   await speakWords([0,1,{i:4,delayBefore:700}],id,400);
   await wait(600,id);
-  /* attempt 1 resolve */
-  setRec(false);
-  stage.classList.add('th-amber');
-  [2,3,5,6].forEach(i=>words[i].className='w dim');
-  setCoach('Close! Listen once more','amber');
-  await wait(1400,id);
-  await karaoke(id);
-  resetWords();
-  stage.classList.remove('th-amber');
-  setCoach('Now read it out loud');
-  setRec(true);
-  await wait(700,id);
-  /* attempt 2, still short */
+  await beatLandsShort([2,3,5,6],id);
+  await beatSpeakerPlays(id);
+  await beatYourTurn(id);
+  /* attempt 2 is still short. No second "you missed" beat: there is no third
+     try to set up, so it goes straight to being saved. */
   await speakWords([0,1,2,{i:4,delayBefore:700}],id,400);
-  await wait(600,id);
-  /* deferred: acknowledge, save, move on */
+  await wait(700,id);
   setRec(false);
+  stage.classList.remove('th-retry');
   stage.classList.add('th-soft');
   words.forEach(w=>{w.className='w dim'});
-  setCoach('Tricky one. Saved for later','soft');
-  await wait(350,id);
+  setCoachHidden(true);
+  setMicAsleep(true);
+  showTip(false);
+  await wait(750,id);
   btnBmk.classList.add('saved','pop');
-  await wait(2300,id);
-  await advanceToVideo(id,'Sigamos con la lección.','Let’s continue with the lesson.');
+  await wait(350,id);
+  await showNotif('Saved to your roadmap',id,'saved');
+  await advanceToVideo(id,'Sigamos con la lecci\u00f3n.','Let\u2019s continue with the lesson.');
 }
 
 /* ================= HARNESS ================= */
@@ -454,6 +514,7 @@ function startFlow(name){
   FLOWS[name](id).catch(()=>{});
 }
 $$('.chips button').forEach(b=>b.onclick=()=>startFlow(b.dataset.flow));
+$('#fillToggle').onchange=e=>stage.classList.toggle('fillwarm',e.target.checked);
 
 /* manual mic tap replays the active flow */
 $('#mic').onclick=()=>{
