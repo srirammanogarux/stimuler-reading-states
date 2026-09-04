@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stimuler · Form onboarding reading states</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0D0B16;
+  --purple:#9D96FF; --accent:#6C63FF;
+  --grn:#43D6A0; --amber:#CF975E; --ambhot:#E8A33D;
+  --goldeye:#F0A32F;
+  --tmid:#A29EB8; --thi:#F5F4FA;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --fd:'Inter',sans-serif; --fb:'Geist',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;font-family:var(--fb)}
+
+.stage{position:relative;width:390px;height:844px;border-radius:36px;overflow:hidden;
+  background:linear-gradient(180deg,#16122A,#120F22 40%,var(--bg) 100%);
+  box-shadow:0 0 0 3px #000,0 0 0 10px #0d0d0d,0 0 0 12px #2a2a2a,0 40px 90px -30px rgba(0,0,0,.6)}
+.stage::before{content:"";position:absolute;top:0;left:0;right:0;height:300px;z-index:0;pointer-events:none;
+  background:radial-gradient(130% 46% at 50% -8%,rgba(108,99,255,.2),transparent 55%)}
+/* washes */
+.wash{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .7s var(--ease)}
+.wash.ambw{background:radial-gradient(120% 80% at 50% 30%,rgba(201,143,63,.22),transparent 70%)}
+.wash.grnw{background:radial-gradient(120% 85% at 50% 32%,rgba(67,214,160,.16),transparent 72%)}
+.stage.th-amber .wash.ambw{opacity:1}
+.stage.th-green .wash.grnw{opacity:1}
+
+/* status bar */
+.status{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:20px 26px 6px;color:#fff}
+.status .t{font-family:var(--fd);font-size:16px;font-weight:600}
+.status .r{display:flex;align-items:center;gap:6px;opacity:.92}
+
+.screen{position:relative;z-index:2;display:flex;flex-direction:column;height:calc(100% - 52px);padding:8px 26px 30px}
+.eyebrow{font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--goldeye);margin-top:14px;transition:color .5s var(--ease)}
+.stage.th-amber .eyebrow{color:var(--ambhot)}
+.fq{font-family:var(--fd);font-weight:600;font-size:17px;line-height:1.45;color:var(--thi);padding-top:8px}
+.scafprog{height:12px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:14px}
+.scafprog i{display:block;height:100%;width:50%;border-radius:inherit;
+  background:linear-gradient(90deg,#5348E8,#A8A1FF);
+  transition:width .45s var(--ease),background .5s var(--ease)}
+.stage.th-amber .scafprog i{background:linear-gradient(90deg,#5348E8,#E8A33D)}
+
+/* readmode card */
+.scaf{position:relative;margin-top:14px;border-radius:18px;padding:22px 20px 66px;
+  background:rgba(108,99,255,.07);border:1px solid rgba(139,132,255,.35);
+  box-shadow:inset 0 0 46px rgba(108,99,255,.15),inset 0 1px 0 rgba(255,255,255,.08);
+  transition:border-color .6s var(--ease),box-shadow .6s var(--ease),background .6s var(--ease)}
+.stage.th-amber .scaf{border-color:rgba(201,143,63,.55);box-shadow:inset 0 0 46px rgba(201,143,63,.1),inset 0 1px 0 rgba(255,255,255,.06)}
+.stage.th-green .scaf{border-color:rgba(67,214,160,.5);box-shadow:inset 0 0 50px rgba(67,214,160,.16),inset 0 1px 0 rgba(255,255,255,.08)}
+.para{font-family:var(--fd);font-weight:500;font-size:17px;line-height:1.75;color:var(--thi)}
+.para .w{transition:color .3s var(--ease)}
+.para .w.said{color:var(--purple)}
+.para .w.right{color:var(--grn)}
+.para .w.miss{color:var(--amber)}
+.para .w.dim{color:rgba(255,255,255,.32)}
+.tools{position:absolute;left:20px;bottom:16px;display:flex;gap:9px}
+.tool{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);color:var(--tmid);
+  transition:color .4s var(--ease),border-color .4s var(--ease),background .4s var(--ease),opacity .4s var(--ease)}
+.tool svg{width:18px;height:18px}
+.stage.th-amber .tool.tr{opacity:.4}
+.stage.th-amber .tool.spk{background:#644c1b;border-color:#9C7247;color:#FCE7C9;cursor:pointer}
+.tool.spk.pulse{animation:spk 1.1s var(--ease) infinite}
+@keyframes spk{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(232,163,61,.45)}50%{transform:scale(1.14);box-shadow:0 0 0 9px rgba(232,163,61,0)}}
+
+/* controls */
+.fcta{margin-top:auto;display:flex;flex-direction:column;align-items:center;padding-top:16px;transition:opacity .4s var(--ease)}
+.fcta.gone{opacity:0;pointer-events:none}
+.microw{position:relative;display:flex;flex-direction:column;align-items:center}
+.tipbub{margin-bottom:17px;background:var(--accent);padding:7px 13px;border-radius:10px;position:relative;
+  box-shadow:0 6px 16px -6px rgba(108,99,255,.5);transition:background .4s var(--ease),box-shadow .4s var(--ease)}
+.tipbub::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%) translateY(-5px) rotate(45deg);width:9px;height:9px;background:var(--accent);transition:background .4s var(--ease)}
+.tipbub span{font-weight:600;font-size:12.5px;color:#fff;white-space:nowrap}
+.microw.amber .tipbub{background:#211a0e;box-shadow:none;border:1px solid rgba(201,143,63,.4)}
+.microw.amber .tipbub::after{background:#211a0e}
+.microw.amber .tipbub span{color:#E8C083}
+.micbtn{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:linear-gradient(180deg,#8B84FF,var(--accent));
+  box-shadow:0 0 0 8px rgba(108,99,255,.07),0 10px 26px -10px rgba(108,99,255,.45);
+  transition:background .4s var(--ease),box-shadow .4s var(--ease),opacity .4s var(--ease)}
+.micbtn svg{width:30px;height:30px}
+.microw.amber .micbtn{background:linear-gradient(180deg,#C89A4A,#7A5620);box-shadow:0 8px 22px -10px rgba(181,130,58,.4);cursor:default;opacity:.92}
+
+.pillrec{display:none;flex-direction:column;align-items:center}
+.pillrec .pr{display:flex;align-items:center;gap:10px;width:320px;background:rgba(255,255,255,.05);
+  border:1px solid #332E48;border-radius:999px;padding:8px 10px}
+.pillrec .pb{flex:0 0 auto;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.pillrec .px{background:rgba(255,255,255,.07);color:var(--tmid)}
+.pillrec .pok{background:linear-gradient(180deg,#8B84FF,var(--accent));color:#fff}
+.pillrec .pwave{flex:1;display:flex;align-items:center;justify-content:space-between;height:26px;padding:0 6px}
+.pillrec .pwave i{width:3.5px;height:4px;border-radius:2px;background:#A8A1FF;opacity:.75;transition:height 90ms ease-out}
+.pillrec .pause{margin-top:10px;padding:8px 16px;font-weight:500;font-size:14px;color:var(--tmid)}
+.fcta.rec .microw{display:none}
+.fcta.rec .pillrec{display:flex}
+
+.endnote{position:absolute;left:0;right:0;bottom:44px;display:flex;align-items:center;justify-content:center;gap:8px;
+  opacity:0;transition:opacity .5s var(--ease) .3s;z-index:3}
+.endnote.show{opacity:1}
+.endnote .dot{width:7px;height:7px;border-radius:50%;background:var(--goldeye)}
+.endnote span{font-weight:500;font-size:14px;color:var(--tmid)}
+
+/* ============ HARNESS ============ */
+.chips{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:8px}
+.chips .lbl{font-family:'Urbanist';font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a;font-weight:700;margin:8px 2px 3px}
+.chips .lbl:first-child{margin-top:0}
+.chips button{display:flex;align-items:center;gap:9px;background:#141414;color:#c4c4c4;border:1px solid #2a2a2a;border-radius:30px;
+  padding:10px 16px 10px 13px;font-family:'Urbanist';font-weight:600;font-size:12.5px;cursor:pointer;transition:.2s var(--ease);white-space:nowrap}
+.chips button .d{width:7px;height:7px;border-radius:50%;background:#4a4a4a;transition:.2s}
+.chips button:hover{background:#1d1d1d;color:#efefef}
+.chips button.active{background:#9D96FF;color:#14102a;border-color:#9D96FF}
+.chips button.active .d{background:#14102a}
+.chips button[data-variant].active{background:#ffda75;border-color:#ffda75;color:#1a1206}
+.chips button[data-variant].active .d{background:#1a1206}
+
+.nav{position:fixed;left:22px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:8px}
+.nav .lbl{font-family:'Urbanist';font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a;font-weight:700;margin:0 2px 3px}
+.nav a{display:block;background:#141414;color:#c4c4c4;border:1px solid #2a2a2a;border-radius:30px;
+  padding:10px 16px;font-family:'Urbanist';font-weight:600;font-size:12.5px;text-decoration:none;transition:.2s var(--ease);white-space:nowrap}
+.nav a:hover{background:#1d1d1d;color:#efefef}
+.nav a.here{background:#ffda75;color:#1a1206;border-color:#ffda75}
+</style>
+<script>if(location.protocol.indexOf('http')===0)document.documentElement.style.zoom='0.85';</script>
+</head>
+<body>
+
+<div class="nav">
+  <div class="lbl">Surface</div>
+  <a href="index.html">Roadmap</a>
+  <a href="chat.html">Chat onboarding</a>
+  <a class="here" href="form.html">Form onboarding</a>
+</div>
+
+<div class="chips" id="chips">
+  <div class="lbl">Branch</div>
+  <button data-variant="hint" class="active"><span class="d"></span>Hint · int/adv</button>
+  <button data-variant="beginner"><span class="d"></span>Beginner · direct</button>
+  <div class="lbl">Reading states</div>
+  <button data-flow="ideal" class="active"><span class="d"></span>Ideal · full read</button>
+  <button data-flow="retry"><span class="d"></span>Retry · partial</button>
+  <button data-flow="deferred"><span class="d"></span>Deferred · 2 tries</button>
+</div>
+
+<div class="stage" id="stage">
+  <div class="wash ambw"></div>
+  <div class="wash grnw"></div>
+
+  <div class="status">
+    <span class="t">9:41</span>
+    <span class="r">
+      <svg width="18" height="12" viewBox="0 0 20 13" fill="#fff"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="5.5" width="3" height="7.5" rx="1"/><rect x="10" y="3" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="13" rx="1"/></svg>
+      <svg width="17" height="13" viewBox="0 0 24 18" fill="#fff"><path d="M12 14.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM12 9c2.2 0 4.2.9 5.6 2.3l-2 2A5.2 5.2 0 0 0 12 12c-1.4 0-2.7.5-3.6 1.4l-2-2A7.9 7.9 0 0 1 12 9zM12 3.5c3.7 0 7.1 1.5 9.6 3.9l-2 2A10.6 10.6 0 0 0 12 6.3c-3 0-5.6 1.2-7.6 3.1l-2-2A13.4 13.4 0 0 1 12 3.5z"/></svg>
+      <svg width="24" height="12" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="#fff" opacity=".4"/><rect x="2" y="2" width="17" height="9" rx="2" fill="#fff"/><path d="M24.5 4.5v4a2.2 2.2 0 0 0 0-4z" fill="#fff" opacity=".4"/></svg>
+    </span>
+  </div>
+
+  <div class="screen">
+    <div class="eyebrow" id="eyebrow">TRY READING THIS</div>
+    <div class="fq" id="fq">“How are things going at work?”</div>
+    <div class="scafprog"><i id="scaffill"></i></div>
+
+    <div class="scaf">
+      <div class="para" id="para"></div>
+      <div class="tools">
+        <span class="tool tr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h9M8.5 5v1.5c0 3-2 5.6-4.5 6.5"/><path d="M6 9.5c1 2.2 3 4 5.5 4.7"/><path d="m12.5 20 4-9 4 9M14 17.4h5"/></svg></span>
+        <span class="tool spk" id="spk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.2L12 19V5L7.2 9.5H4z"/><path d="M15.6 8.8a4.4 4.4 0 0 1 0 6.4"/><path d="M18.3 6.1a8 8 0 0 1 0 11.8"/></svg></span>
+      </div>
+    </div>
+
+    <div class="fcta" id="fcta">
+      <div class="microw" id="microw">
+        <div class="tipbub"><span id="tiptext">Tap the mic and read</span></div>
+        <div class="micbtn" id="micbtn">
+          <svg viewBox="0 0 24 24" fill="#fff"><rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5 11.5v.5a7 7 0 0 0 14 0v-.5M12 19.5V22M8 22h8" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div class="pillrec">
+        <div class="pr">
+          <span class="pb px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span>
+          <span class="pwave" id="pwave"></span>
+          <span class="pb pok"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        </div>
+        <div class="pause">Pause</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="endnote" id="endnote"><span class="dot"></span><span>Finding your level…</span></div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const stage=$('#stage'),eyebrow=$('#eyebrow'),fq=$('#fq'),scaffill=$('#scaffill'),para=$('#para');
+const fcta=$('#fcta'),microw=$('#microw'),tiptext=$('#tiptext'),spk=$('#spk'),endnote=$('#endnote');
+
+const VARIANTS={
+  hint:{
+    eyebrow:'TRY READING THIS',
+    title:'“How are things going at work?”',
+    passage:'Things are going well at work. I am busy, but I like my team. We finish a big project this week. After that it should be calmer.',
+    heard1:13, heard2:20
+  },
+  beginner:{
+    eyebrow:'LET’S HEAR YOU SPEAK',
+    title:'Read this out loud. We will listen and find your level.',
+    passage:'My name is Sriram. I am learning English for my work. I will practice a little every day. I know I can do this.',
+    heard1:12, heard2:18
+  }
+};
+const RETRY_EYEBROW='WE DIDN’T GET THAT RIGHT, TRY AGAIN';
+const NOTED_EYEBROW='NO WORRIES, WE’VE NOTED IT';
+let variant='hint',words=[],N=0;
+
+function setPassage(){
+  const v=VARIANTS[variant];
+  para.innerHTML=v.passage.split(' ').map((w,i)=>`<span class="w" data-i="${i}">${w}</span>`).join(' ');
+  words=[...para.querySelectorAll('.w')];N=words.length;
+}
+function setHeader(eb,title){eyebrow.textContent=eb;if(title)fq.textContent=title}
+
+/* wave bars */
+const PWN=22,pwave=$('#pwave');
+for(let i=0;i<PWN;i++)pwave.appendChild(document.createElement('i'));
+let waveTimer=null;
+function startWave(){
+  const bars=[...pwave.children];
+  waveTimer=setInterval(()=>{bars.forEach((b,i)=>{
+    b.style.height=`${4+Math.random()*20*(0.4+0.6*Math.sin(i/PWN*Math.PI))}px`;});},90);
+}
+function stopWave(){clearInterval(waveTimer);[...pwave.children].forEach(b=>b.style.height='4px')}
+
+/* run-token cancellation */
+let runId=0;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function wait(ms,id){await sleep(ms);if(id!==runId)throw 'cancelled'}
+
+function setFill(pct){scaffill.style.width=pct+'%'}
+function setControls(mode,tip){ /* mic | amber | rec | gone */
+  fcta.classList.toggle('gone',mode==='gone');
+  fcta.classList.toggle('rec',mode==='rec');
+  microw.classList.toggle('amber',mode==='amber');
+  if(mode==='rec')startWave();else stopWave();
+  if(tip!==undefined)tiptext.textContent=tip;
+}
+function clearThemes(){stage.classList.remove('th-amber','th-green');spk.classList.remove('pulse')}
+
+function reset(){
+  clearThemes();
+  setPassage();
+  const v=VARIANTS[variant];
+  setHeader(v.eyebrow,v.title);
+  setFill(50);
+  setControls('mic','Tap the mic and read');
+  endnote.classList.remove('show');
+}
+
+async function record(count,id,pace=240){
+  setControls('rec');
+  await wait(500,id);
+  for(let i=0;i<count;i++){
+    words[i].classList.add('said');
+    setFill(50+Math.round(i/N*50));
+    await wait(pace+Math.random()*90,id);
+  }
+  await wait(650,id);
+}
+function evaluate(count,missClass){
+  words.forEach((w,i)=>{w.className='w '+(i<count?'right':missClass)});
+}
+
+/* ================= FLOWS ================= */
+
+async function flowIdeal(id){
+  reset();
+  await wait(1600,id);
+  await record(N,id);
+  /* success, as shipped: all green, green wash, controls gone */
+  evaluate(N,'miss');
+  setFill(100);
+  stage.classList.add('th-green');
+  setControls('gone');
+  await wait(1200,id);
+  endnote.classList.add('show');
+}
+
+async function retryBeat(id){
+  const v=VARIANTS[variant];
+  /* evaluate try 1: right → green, missed → dark amber; screen warms up */
+  evaluate(v.heard1,'miss');
+  stage.classList.add('th-amber');
+  setHeader(RETRY_EYEBROW);
+  spk.classList.add('pulse');
+  setControls('amber','Listen & Try again');
+  await wait(2200,id);
+  /* speaker tapped → immediately switch to the reset screen */
+  spk.classList.remove('pulse');
+  await wait(300,id);
+  stage.classList.remove('th-amber');
+  words.forEach(w=>w.className='w');
+  setHeader(v.eyebrow);
+  setFill(50);
+  setControls('mic','Let’s speak again');
+  await wait(1600,id);
+}
+
+async function flowRetry(id){
+  reset();
+  await wait(1600,id);
+  await record(VARIANTS[variant].heard1,id);
+  await retryBeat(id);
+  /* try 2: full read → success, same as shipped */
+  await record(N,id);
+  evaluate(N,'miss');
+  setFill(100);
+  stage.classList.add('th-green');
+  setControls('gone');
+  await wait(1200,id);
+  endnote.classList.add('show');
+}
+
+async function flowDeferred(id){
+  reset();
+  await wait(1600,id);
+  await record(VARIANTS[variant].heard1,id);
+  await retryBeat(id);
+  /* try 2: better, still short */
+  const v=VARIANTS[variant];
+  await record(v.heard2,id);
+  /* deferred: noted, positive green, full bar, move forward */
+  evaluate(v.heard2,'dim');
+  setHeader(NOTED_EYEBROW);
+  setFill(100);
+  stage.classList.add('th-green');
+  setControls('gone');
+  await wait(1200,id);
+  endnote.classList.add('show');
+}
+
+/* ================= HARNESS ================= */
+const FLOWS={ideal:flowIdeal,retry:flowRetry,deferred:flowDeferred};
+function currentFlow(){const b=document.querySelector('.chips button[data-flow].active');return b?b.dataset.flow:'ideal'}
+function startFlow(name){
+  $$('.chips button[data-flow]').forEach(b=>b.classList.toggle('active',b.dataset.flow===name));
+  history.replaceState(null,'','#'+(variant==='hint'?'':'beginner-')+name);
+  const id=++runId;
+  FLOWS[name](id).catch(()=>{});
+}
+$$('.chips button[data-flow]').forEach(b=>b.onclick=()=>startFlow(b.dataset.flow));
+$$('.chips button[data-variant]').forEach(b=>b.onclick=()=>{
+  variant=b.dataset.variant;
+  $$('.chips button[data-variant]').forEach(x=>x.classList.toggle('active',x===b));
+  startFlow(currentFlow());
+});
+$('#micbtn').onclick=()=>startFlow(currentFlow());
+
+/* hash: #retry · #deferred · #beginner-retry … */
+const h=location.hash.slice(1);
+if(h.startsWith('beginner-')||h==='beginner'){
+  variant='beginner';
+  $$('.chips button[data-variant]').forEach(x=>x.classList.toggle('active',x.dataset.variant==='beginner'));
+}
+const f=h.replace('beginner-','').replace('beginner','')||'ideal';
+startFlow(FLOWS[f]?f:'ideal');
+</script>
+</body>
+</html>

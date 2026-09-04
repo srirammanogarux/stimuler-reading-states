@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stimuler · Chat onboarding reading states</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0D0B14; --raise:#0A0810;
+  --purple:#9D96FF; --accent:#6C63FF;
+  --grn:#63E39B; --grnsoft:#5E7A6A; --amber:#CF975E;
+  --gold:#D9A24A;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --fd:'Inter',sans-serif; --fb:'Geist',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;font-family:var(--fb)}
+
+.stage{position:relative;width:430px;height:932px;background:var(--bg);border-radius:46px;overflow:hidden;
+  box-shadow:0 0 0 3px #000,0 0 0 10px #0d0d0d,0 0 0 12px #2a2a2a,0 40px 90px -30px rgba(0,0,0,.6)}
+
+/* status bar */
+.status{display:flex;align-items:center;justify-content:space-between;padding:20px 26px 10px;color:#fff;
+  background:linear-gradient(98deg,var(--bg) 27%,var(--raise) 101%)}
+.status .t{font-family:var(--fd);font-size:16px;font-weight:600}
+.status .r{display:flex;align-items:center;gap:6px;font-size:12px;opacity:.92}
+
+/* progress block */
+.progblock{display:flex;flex-direction:column;gap:12px;padding:12px 24px 20px;
+  background:linear-gradient(94deg,var(--bg) 16%,var(--raise) 106%)}
+.proglabel{font-weight:500;font-size:15.3px;line-height:23px;letter-spacing:.01em;color:var(--gold);min-height:23px;transition:color .4s var(--ease)}
+.progtrack{position:relative;height:12px;border-radius:999px;background:#26242E;overflow:hidden}
+.progfill{position:absolute;left:0;top:0;bottom:0;width:76%;border-radius:999px;
+  background:linear-gradient(180deg,#E7B455,#C68F35);transition:width .8s var(--ease)}
+
+/* chat stream */
+.stream{display:flex;flex-direction:column;gap:28px;padding:16px 24px 0}
+.msg{display:flex;gap:10px;align-items:flex-start;opacity:0;transform:translateY(14px);transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.msg.in{opacity:1;transform:translateY(0)}
+.msg .dp{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:#1B1D3B;border:1px solid rgba(155,161,231,.5);overflow:hidden}
+.msg .dp img{width:100%;height:100%;object-fit:cover;display:block}
+.bubble{position:relative;max-width:300px;padding:14px 18px;border-radius:24px;background:#191723;border:1px solid rgba(137,130,255,.38)}
+.bubble::after{content:"";position:absolute;left:-4.5px;top:14px;width:9px;height:9px;background:#191723;
+  border-left:1px solid rgba(137,130,255,.38);border-bottom:1px solid rgba(137,130,255,.38);border-bottom-left-radius:2.5px;transform:rotate(45deg)}
+.bubble p{font-size:17px;line-height:26px;color:#fff;word-break:break-word}
+.bubble .typing{display:flex;gap:5px;align-items:center;min-width:52px;height:26px}
+.bubble .typing i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.7);animation:tb 1s ease-in-out infinite}
+.bubble .typing i:nth-child(2){animation-delay:.15s}
+.bubble .typing i:nth-child(3){animation-delay:.3s}
+@keyframes tb{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+/* read-aloud card (glass + indigo glow, per india-onboarding data-theme="app") */
+.readcard{align-self:center;width:324px;margin-top:2px;padding:18px;border-radius:20px;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.10);
+  box-shadow:inset 0 0 60px rgba(108,99,255,.13),inset 0 1px 0 rgba(255,255,255,.06);
+  display:flex;flex-direction:column;gap:14px;
+  opacity:0;transform:translateY(14px);
+  transition:opacity .45s var(--ease),transform .45s var(--ease),background .6s var(--ease),border-color .6s var(--ease),box-shadow .6s var(--ease)}
+.readcard.in{opacity:1;transform:translateY(0)}
+.rc-label{font-family:var(--fd);font-weight:500;font-size:16.2px;line-height:22px;color:#A9A4BC;transition:color .5s var(--ease)}
+.rc-text{font-weight:500;font-size:22px;line-height:32px;color:rgba(255,255,255,.38)}
+.rc-text .w{transition:color .35s var(--ease)}
+.rc-text .w.said{color:var(--purple)}
+.rc-text .w.right{color:var(--grn)}
+.rc-text .w.miss{color:var(--amber)}
+.rc-text .w.dimg{color:var(--grnsoft)}
+.rc-icons{display:flex;gap:22px}
+.rc-icons .chip{width:36px;height:36px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+  display:flex;align-items:center;justify-content:center;color:#BBB7FF;transition:background .5s var(--ease),border-color .5s var(--ease),color .5s var(--ease),opacity .5s var(--ease)}
+.rc-icons .chip svg{width:18px;height:18px;display:block}
+
+/* retry state: warm amber card */
+.readcard.retry{background:linear-gradient(180deg,rgba(80,55,22,.34),rgba(38,27,12,.22));border-color:rgba(201,143,63,.55);
+  box-shadow:inset 0 0 50px rgba(201,143,63,.12),inset 0 1px 0 rgba(255,255,255,.05)}
+.readcard.retry .rc-label{color:#E8C083}
+.readcard.retry .chip.tr{opacity:.4}
+.readcard.retry .chip.spk{background:#644c1b;border-color:#9C7247;color:#FCE7C9;cursor:pointer}
+.chip.spk.pulse{animation:spk 1.1s var(--ease) infinite}
+@keyframes spk{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(232,163,61,.45)}50%{transform:scale(1.14);box-shadow:0 0 0 9px rgba(232,163,61,0)}}
+
+/* success state: deep green done card (as shipped) */
+.readcard.done{background:#0B150F;border-color:#2E7D52;
+  box-shadow:inset 0 0 50px rgba(50,225,141,.10),inset 0 1px 0 rgba(255,255,255,.05)}
+.readcard.done .rc-label{color:#4CAF7D}
+.readcard.done .chip{background:rgba(126,255,184,.1);border-color:#16653F;color:#BFF6DC}
+
+/* deferred state: soft green noted card */
+.readcard.noted{background:rgba(50,225,141,.05);border-color:rgba(50,225,141,.32);
+  box-shadow:inset 0 0 50px rgba(50,225,141,.07),inset 0 1px 0 rgba(255,255,255,.04)}
+.readcard.noted .rc-label{color:#7CC98B}
+.readcard.noted .chip{background:rgba(126,255,184,.07);border-color:rgba(22,101,63,.7);color:#9ADFB6}
+
+/* ============ MIC (orb → pill → tick, per india convmic) ============ */
+.micarea{position:absolute;left:0;right:0;bottom:60px;display:flex;align-items:center;justify-content:center;z-index:6;transition:opacity .4s var(--ease)}
+.micarea.gone{opacity:0;pointer-events:none}
+.micwrap{position:relative;display:flex;align-items:center;justify-content:center}
+.mictip{position:absolute;bottom:calc(100% + 14px);left:50%;transform:translateX(-50%);padding:8px 16px;border-radius:999px;
+  background:#211F2E;border:1px solid rgba(255,255,255,.1);font-family:var(--fd);font-weight:500;font-size:13.5px;line-height:18px;color:#E9E6F2;
+  white-space:nowrap;transition:opacity .3s var(--ease);animation:tipfloat 2.2s ease-in-out infinite}
+.mictip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#211F2E}
+@keyframes tipfloat{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-4px)}}
+.micarea.rec .mictip,.micarea.submit .mictip{opacity:0}
+
+.orb{width:78px;height:78px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;
+  background:radial-gradient(circle at 50% 32%,#BBB7FF 0%,#8982FF 28%,#6C63FF 65%,#4D46B5 100%);
+  box-shadow:0 14px 38px rgba(108,99,255,.5),inset 0 -3px 9px rgba(45,42,107,.45),inset 0 2px 5px rgba(255,255,255,.18);
+  transition:background .4s var(--ease),box-shadow .4s var(--ease),opacity .3s var(--ease),transform .3s var(--ease)}
+.orb svg{width:26px;height:26px}
+.orb::before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(108,99,255,.45);z-index:-1;animation:orbp 2.4s ease-out infinite}
+@keyframes orbp{0%{transform:scale(1);opacity:.6}80%,100%{transform:scale(1.45);opacity:0}}
+/* amber inactive mic (retry mode) */
+.micarea.amber .orb{background:radial-gradient(circle at 50% 32%,#D9A85A 0%,#B5823A 45%,#7A5620 100%);
+  box-shadow:0 10px 28px rgba(181,130,58,.35);cursor:default;opacity:.92}
+.micarea.amber .orb::before{display:none}
+.micarea.rec .orb,.micarea.submit .orb{display:none}
+
+/* expanded recording pill */
+.pill{position:relative;width:300px;height:62px;border-radius:999px;display:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));
+  border:1.6px solid rgba(108,99,255,.55);box-shadow:0 12px 36px rgba(108,99,255,.22)}
+.micarea.rec .pill{display:block}
+.pill .x{position:absolute;left:7px;top:9px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;color:#fff}
+.pill .ok{position:absolute;right:7px;top:6px;width:46px;height:46px;border-radius:50%;background:var(--accent);
+  box-shadow:0 4px 14px rgba(108,99,255,.4);display:flex;align-items:center;justify-content:center;color:#fff}
+.pill .wave{position:absolute;left:58px;right:56px;top:13px;height:36px;display:flex;align-items:center;justify-content:center;gap:3px}
+.pill .wave i{width:3px;height:4px;border-radius:2px;background:#8982FF;transition:height 90ms ease-out}
+/* submitting tick */
+.sub{width:62px;height:62px;border-radius:999px;background:var(--accent);display:none;align-items:center;justify-content:center;color:#fff}
+.micarea.submit .sub{display:flex}
+
+/* ============ TOP BANNER (as shipped "Well done !") ============ */
+.banner{position:absolute;top:14px;left:12px;right:12px;z-index:30;display:flex;align-items:center;gap:18px;
+  padding:20px 22px;border-radius:24px;pointer-events:none;
+  background:linear-gradient(180deg,#16311F,#0D1F14);border:1px solid rgba(50,225,141,.4);
+  box-shadow:0 14px 40px rgba(0,0,0,.5);
+  transform:translateY(-140px);opacity:0;transition:transform .5s var(--ease),opacity .3s var(--ease)}
+.banner.show{transform:translateY(0);opacity:1}
+.banner .ck{flex:0 0 auto;width:52px;height:52px;border-radius:50%;background:#32E18D;display:flex;align-items:center;justify-content:center}
+.banner .ck svg{width:24px;height:24px;color:#06301B}
+.banner .t{display:block;font-family:var(--fd);font-weight:600;font-size:22px;line-height:28px;color:#32E18D}
+.banner .s{display:block;margin-top:2px;font-size:14.5px;line-height:20px;color:rgba(255,255,255,.85)}
+
+/* ============ HARNESS ============ */
+.chips{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:8px}
+.chips .lbl{font-family:'Urbanist';font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a;font-weight:700;margin:0 2px 3px}
+.chips button{display:flex;align-items:center;gap:9px;background:#141414;color:#c4c4c4;border:1px solid #2a2a2a;border-radius:30px;
+  padding:10px 16px 10px 13px;font-family:'Urbanist';font-weight:600;font-size:12.5px;cursor:pointer;transition:.2s var(--ease);white-space:nowrap}
+.chips button .d{width:7px;height:7px;border-radius:50%;background:#4a4a4a;transition:.2s}
+.chips button:hover{background:#1d1d1d;color:#efefef}
+.chips button.active{background:#9D96FF;color:#14102a;border-color:#9D96FF}
+.chips button.active .d{background:#14102a}
+
+.nav{position:fixed;left:22px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:8px}
+.nav .lbl{font-family:'Urbanist';font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a;font-weight:700;margin:0 2px 3px}
+.nav a{display:block;background:#141414;color:#c4c4c4;border:1px solid #2a2a2a;border-radius:30px;
+  padding:10px 16px;font-family:'Urbanist';font-weight:600;font-size:12.5px;text-decoration:none;transition:.2s var(--ease);white-space:nowrap}
+.nav a:hover{background:#1d1d1d;color:#efefef}
+.nav a.here{background:#ffda75;color:#1a1206;border-color:#ffda75}
+</style>
+<script>if(location.protocol.indexOf('http')===0)document.documentElement.style.zoom='0.85';</script>
+</head>
+<body>
+
+<div class="nav">
+  <div class="lbl">Surface</div>
+  <a href="index.html">Roadmap</a>
+  <a class="here" href="chat.html">Chat onboarding</a>
+  <a href="form.html">Form onboarding</a>
+</div>
+
+<div class="chips" id="chips">
+  <div class="lbl">Reading states</div>
+  <button data-flow="ideal" class="active"><span class="d"></span>Ideal · full read</button>
+  <button data-flow="retry"><span class="d"></span>Retry · partial</button>
+  <button data-flow="deferred"><span class="d"></span>Deferred · 2 tries</button>
+</div>
+
+<div class="stage" id="stage">
+  <div class="status">
+    <span class="t">9:41</span>
+    <span class="r">
+      <svg width="18" height="12" viewBox="0 0 20 13" fill="#fff"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="5.5" width="3" height="7.5" rx="1"/><rect x="10" y="3" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="13" rx="1"/></svg>
+      <svg width="17" height="13" viewBox="0 0 24 18" fill="#fff"><path d="M12 14.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM12 9c2.2 0 4.2.9 5.6 2.3l-2 2A5.2 5.2 0 0 0 12 12c-1.4 0-2.7.5-3.6 1.4l-2-2A7.9 7.9 0 0 1 12 9zM12 3.5c3.7 0 7.1 1.5 9.6 3.9l-2 2A10.6 10.6 0 0 0 12 6.3c-3 0-5.6 1.2-7.6 3.1l-2-2A13.4 13.4 0 0 1 12 3.5z"/></svg>
+      <svg width="24" height="12" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="22" height="12" rx="3.5" stroke="#fff" opacity=".4"/><rect x="2" y="2" width="17" height="9" rx="2" fill="#fff"/><path d="M24.5 4.5v4a2.2 2.2 0 0 0 0-4z" fill="#fff" opacity=".4"/></svg>
+    </span>
+  </div>
+
+  <div class="progblock">
+    <div class="proglabel" id="proglabel">Onto the last step</div>
+    <div class="progtrack"><div class="progfill" id="progfill"></div></div>
+  </div>
+
+  <div class="banner" id="banner">
+    <span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></span>
+    <span><span class="t" id="bannerT">Well done !</span><span class="s" id="bannerS">You finished reading your first English phrase</span></span>
+  </div>
+
+  <div class="stream">
+    <div class="msg" id="msg1">
+      <div class="dp"><img src="assets/sarah-avatar.png" alt="Sarah"></div>
+      <div class="bubble" id="bub1"><div class="typing"><i></i><i></i><i></i></div></div>
+    </div>
+
+    <div class="readcard" id="card">
+      <div class="rc-label" id="rclabel">Read it out loud:</div>
+      <div class="rc-text" id="rctext"></div>
+      <div class="rc-icons">
+        <span class="chip tr"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M7.75 2.75a.75.75 0 0 0-1.5 0v1.258a33 33 0 0 0-3.599.278.75.75 0 1 0 .198 1.487A31.5 31.5 0 0 1 8.7 5.545 19.4 19.4 0 0 1 7 9.56a19.4 19.4 0 0 1-1.002-2.05.75.75 0 0 0-1.384.577 21 21 0 0 0 1.492 2.91 19.6 19.6 0 0 1-3.828 4.154.75.75 0 1 0 .945 1.164A21.1 21.1 0 0 0 7 12.331c.095.132.192.262.29.391a.75.75 0 0 0 1.194-.91c-.204-.266-.4-.538-.59-.815a20.9 20.9 0 0 0 2.333-5.332c.31.031.618.068.924.108a.75.75 0 0 0 .198-1.487 32.8 32.8 0 0 0-3.599-.278V2.75Z"/><path d="M13 8a.75.75 0 0 1 .671.415l4.25 8.5a.75.75 0 1 1-1.342.67L15.787 16h-5.573l-.793 1.585a.75.75 0 1 1-1.342-.67l4.25-8.5A.75.75 0 0 1 13 8Zm2.037 6.5L13 10.427 10.964 14.5h4.073Z"/></svg></span>
+        <span class="chip spk" id="spk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9 9 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"/></svg></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="micarea" id="micarea">
+    <div class="micwrap">
+      <div class="mictip" id="mictip">Tap to speak</div>
+      <div class="orb" id="orb">
+        <svg viewBox="0 0 24 24" fill="#fff"><rect x="9" y="2.5" width="6" height="12" rx="3"/><path d="M5 11.5v.5a7 7 0 0 0 14 0v-.5M12 19.5V22M8 22h8" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg>
+      </div>
+      <div class="pill">
+        <span class="x"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span>
+        <span class="wave" id="wave"></span>
+        <span class="ok"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></span>
+      </div>
+      <div class="sub"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const stage=$('#stage'),micarea=$('#micarea'),mictip=$('#mictip'),card=$('#card'),rclabel=$('#rclabel'),rctext=$('#rctext');
+const spk=$('#spk'),bub1=$('#bub1'),msg1=$('#msg1'),banner=$('#banner'),bannerT=$('#bannerT'),bannerS=$('#bannerS');
+
+const PASSAGE='I love to paint in my free time, it helps me relax and be creative.';
+let words=[];
+function setPhrase(){
+  rctext.innerHTML=PASSAGE.split(' ').map((w,i)=>`<span class="w" data-i="${i}">${w}</span>`).join(' ');
+  words=[...rctext.querySelectorAll('.w')];
+}
+
+/* wave bars */
+const WAVEN=26,waveEl=$('#wave');
+for(let i=0;i<WAVEN;i++)waveEl.appendChild(document.createElement('i'));
+let waveTimer=null;
+function startWave(){
+  const bars=[...waveEl.children],mid=(WAVEN-1)/2;
+  waveTimer=setInterval(()=>{bars.forEach((b,i)=>{
+    const env=Math.exp(-Math.pow((i-mid)/(WAVEN*.4),2));
+    b.style.height=`${4+Math.random()*28*env}px`;});},90);
+}
+function stopWave(){clearInterval(waveTimer);[...waveEl.children].forEach(b=>b.style.height='4px')}
+
+/* run-token cancellation */
+let runId=0;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function wait(ms,id){await sleep(ms);if(id!==runId)throw 'cancelled'}
+
+function setMic(mode,tip){ /* idle | rec | submit | amber | gone */
+  micarea.className='micarea'+(mode==='idle'?'':' '+mode);
+  if(mode==='rec')startWave();else stopWave();
+  if(tip!==undefined)mictip.textContent=tip;
+}
+function setProgress(pct,label){$('#progfill').style.width=pct+'%';if(label)$('#proglabel').textContent=label}
+function setCard(state,label){ /* '' | retry | done | noted */
+  card.className='readcard in'+(state?' '+state:'');
+  rclabel.textContent=label;
+  spk.classList.remove('pulse');
+}
+async function showBanner(t,s,hold,id){
+  bannerT.textContent=t;bannerS.textContent=s;
+  banner.classList.add('show');
+  await wait(hold,id);
+  banner.classList.remove('show');
+}
+
+function reset(){
+  banner.classList.remove('show');
+  msg1.classList.remove('in');card.classList.remove('in');
+  bub1.innerHTML='<div class="typing"><i></i><i></i><i></i></div>';
+  setPhrase();
+  card.className='readcard';rclabel.textContent='Read it out loud:';
+  spk.classList.remove('pulse');
+  setMic('gone');
+  setProgress(76,'Onto the last step');
+}
+
+async function intro(id){
+  await wait(500,id);
+  msg1.classList.add('in');
+  await wait(1100,id);
+  bub1.innerHTML='<p>We’re almost done! As a last step I’d like you to read the following passage</p>';
+  await wait(700,id);
+  card.classList.add('in');
+  await wait(500,id);
+  setMic('idle','Tap to speak');
+}
+
+/* fill words purple, sequential subset */
+async function speak(idx,id,pace=300){
+  for(const i of idx){words[i].classList.add('said');await wait(pace+Math.random()*120,id)}
+}
+async function record(idx,id){
+  setProgress(84,'84% completed');
+  setMic('rec');
+  await wait(500,id);
+  await speak(idx,id);
+  await wait(650,id);
+  setMic('submit');
+  await wait(700,id);
+}
+function evaluate(rightIdx,missClass){
+  words.forEach((w,i)=>{w.className='w '+(rightIdx.includes(i)?'right':missClass)});
+}
+const ALL=[...Array(15).keys()];
+
+/* ================= FLOWS ================= */
+
+async function flowIdeal(id){
+  reset();await intro(id);
+  await wait(1500,id);
+  await record(ALL,id);
+  setMic('gone');
+  evaluate(ALL,'miss');
+  setCard('done','Read it out loud:');
+  setProgress(92,'92% completed');
+  await showBanner('Well done !','You finished reading your first English phrase',2400,id);
+}
+
+async function flowRetry(id){
+  reset();await intro(id);
+  await wait(1500,id);
+  /* try 1: only the first half lands */
+  await record([0,1,2,3,4,5,6],id);
+  /* evaluate: right → green, missed → dark amber; card warms up */
+  evaluate([0,1,2,3,4,5,6],'miss');
+  setCard('retry','We didn’t get it fully.. Try again!');
+  spk.classList.add('pulse');
+  setMic('amber','Listen & Try again');
+  await wait(2200,id);
+  /* speaker tapped → immediately switch to the reset screen */
+  spk.classList.remove('pulse');
+  await wait(300,id);
+  words.forEach(w=>w.className='w');
+  setCard('','Read it out loud:');
+  setMic('idle','Let’s speak again');
+  await wait(1600,id);
+  /* try 2: full read → success, same as shipped */
+  await record(ALL,id);
+  setMic('gone');
+  evaluate(ALL,'miss');
+  setCard('done','Read it out loud:');
+  setProgress(92,'92% completed');
+  await showBanner('Well done !','You finished reading your first English phrase',2400,id);
+}
+
+async function flowDeferred(id){
+  reset();await intro(id);
+  await wait(1500,id);
+  /* try 1 */
+  await record([0,1,2,3,4,5,6],id);
+  evaluate([0,1,2,3,4,5,6],'miss');
+  setCard('retry','We didn’t get it fully.. Try again!');
+  spk.classList.add('pulse');
+  setMic('amber','Listen & Try again');
+  await wait(2200,id);
+  spk.classList.remove('pulse');
+  await wait(300,id);
+  words.forEach(w=>w.className='w');
+  setCard('','Read it out loud:');
+  setMic('idle','Let’s speak again');
+  await wait(1600,id);
+  /* try 2: better, still short */
+  await record([0,1,2,3,4,5,6,7,8,9],id);
+  setMic('gone');
+  /* deferred: everything goes positive green, noted for later */
+  evaluate([0,1,2,3,4,5,6,7,8,9],'dimg');
+  setCard('noted','Its okay! We will try later..');
+  setProgress(92,'92% completed');
+  await showBanner('No worries, we’ve noted it!','We will practice similar phrases later on, let’s move forward',3000,id);
+}
+
+/* ================= HARNESS ================= */
+const FLOWS={ideal:flowIdeal,retry:flowRetry,deferred:flowDeferred};
+function startFlow(name){
+  $$('.chips button').forEach(b=>b.classList.toggle('active',b.dataset.flow===name));
+  history.replaceState(null,'','#'+name);
+  const id=++runId;
+  FLOWS[name](id).catch(()=>{});
+}
+$$('.chips button').forEach(b=>b.onclick=()=>startFlow(b.dataset.flow));
+$('#orb').onclick=()=>{
+  const active=document.querySelector('.chips button.active');
+  if(active)startFlow(active.dataset.flow);
+};
+const initial=location.hash.slice(1);
+startFlow(FLOWS[initial]?initial:'ideal');
+</script>
+</body>
+</html>
